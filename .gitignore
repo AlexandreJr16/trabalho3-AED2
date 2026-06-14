@@ -1,0 +1,12 @@
+# Dados gerados
+data/
+
+# Objetos de compilação
+*.o
+obj/
+
+# Executável principal
+trabalho3
+
+# Binários de teste
+test_*
