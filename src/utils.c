@@ -9,14 +9,11 @@ long int genRandomNumber(long int min, long int max) {
 }
 
 void gerarValoresUnicos(long int *valores, long int quantidade, long int range) {
-    // Usar um vetor de flags para garantir unicidade
-    // range pode ser grande (até 1.000.000), mas cabe na memória
     char *usado = (char *)calloc(range + 1, sizeof(char));
     if (usado == NULL) {
         fprintf(stderr, "Erro: falha ao alocar memória em gerarValoresUnicos\n");
         exit(EXIT_FAILURE);
     }
-
     long int gerados = 0;
     while (gerados < quantidade) {
         long int v = genRandomNumber(1, range);
@@ -26,7 +23,6 @@ void gerarValoresUnicos(long int *valores, long int quantidade, long int range) 
             gerados++;
         }
     }
-
     free(usado);
 }
 

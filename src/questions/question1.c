@@ -35,7 +35,6 @@ void question1(ArquivoProdutos *ap, FILE *output) {
         return;
     }
 
-    // 1. Ler todos os registros e guardar codigos
     long int *codigosReais = (long int *)malloc(qtd * sizeof(long int));
     IndiceBST *bst = createIndiceBST();
     TabelaHash *hash = createTabelaHash(200003); // Load factor ~0.5
@@ -45,32 +44,31 @@ void question1(ArquivoProdutos *ap, FILE *output) {
         lerProdutoArquivo(ap, i, &p);
         codigosReais[i] = p.codigo;
         
-        // 2. Construir Índices
+        //Construir Índices
         insertIndiceBST(bst, p.codigo, i);
         insertTabelaHash(hash, p.codigo, i);
     }
 
-    // 3. Sortear 30 índices do array de codigos
+    //Sorteia 30 índices
     long int indicesSorteados[30];
     gerarValoresUnicos(indicesSorteados, 30, qtd);
     
     long int alvos[30];
     for (int i = 0; i < 30; i++) {
-        indicesSorteados[i] -= 1; // convert from [1, qtd] to [0, qtd-1]
+        indicesSorteados[i] -= 1; 
         alvos[i] = codigosReais[indicesSorteados[i]];
     }
 
-    // Estruturas para guardar tempos
     double temposSeq[30], temposBST[30], temposHash[30];
 
-    // 4. Loop de medição com repetições para confiabilidade
-    //    Cada tempo = pipeline completo (índice + acesso a disco)
+
+
     for (int i = 0; i < 30; i++) {
         long int alvo = alvos[i];
         double inicio, fim;
         Produto p;
 
-        // --- Busca Sequencial (10 repetições para evitar lentidão extrema de I/O) ---
+        // Busca seq
         inicio = getTempoAtual();
         for (int r = 0; r < 10; r++) {
             buscaSequencialCodigo(ap, alvo, &p);
@@ -78,7 +76,7 @@ void question1(ArquivoProdutos *ap, FILE *output) {
         fim = getTempoAtual();
         temposSeq[i] = ((fim - inicio) * 1000.0) / 10.0;
 
-        // --- Busca IndiceBST (pipeline completo: índice + acesso a disco) ---
+        // Busca bst 
         inicio = getTempoAtual();
         for (int r = 0; r < REPETICOES_Q1; r++) {
             long int nreg = searchIndiceBST(bst, alvo);
@@ -87,7 +85,7 @@ void question1(ArquivoProdutos *ap, FILE *output) {
         fim = getTempoAtual();
         temposBST[i] = ((fim - inicio) * 1000.0) / REPETICOES_Q1;
 
-        // --- Busca TabelaHash (pipeline completo: índice + acesso a disco) ---
+        //busca hash 
         inicio = getTempoAtual();
         for (int r = 0; r < REPETICOES_Q1; r++) {
             long int nreg = searchTabelaHash(hash, alvo);
@@ -105,7 +103,7 @@ void question1(ArquivoProdutos *ap, FILE *output) {
     calcularEstat(temposBST, &mediaBST, &desvioBST);
     calcularEstat(temposHash, &mediaHash, &desvioHash);
 
-    // 5 e 6. Impressão de resultados
+    // Imprime
     fprintf(output, "--------------------------------------------------\n");
     fprintf(output, "Resultados (Media e Desvio Padrao de 30 buscas):\n");
     fprintf(output, "--------------------------------------------------\n");
@@ -116,7 +114,6 @@ void question1(ArquivoProdutos *ap, FILE *output) {
     fprintf(output, "Colisoes na Tabela Hash (tam 200003): %ld\n", getColisoesTabelaHash(hash));
     fprintf(output, "##################################################\n");
 
-    // Limpeza
     free(codigosReais);
     destroyIndiceBST(bst);
     destroyTabelaHash(hash);

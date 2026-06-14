@@ -10,13 +10,11 @@ void question0(ArquivoProdutos *ap, FILE *output) {
     if (ap == NULL) return;
     if (output == NULL) output = stdout;
 
-    fprintf(output, "##################################################\n");
-    fprintf(output, "##   Dica 2: Validacao de Indices (Dataset Pequeno)\n");
-    fprintf(output, "##################################################\n");
+    fprintf(output, "Validacao de Indices (Dataset Pequeno)\n");
 
     long int qtd = getQuantidadeArquivo(ap);
 
-    // 1. Construir índices BST e Hash a partir do arquivo
+    // Construir BST e Hash
     IndiceBST *bst = createIndiceBST();
     TabelaHash *hash = createTabelaHash(DICA2_HASH_TAM);
 
@@ -28,7 +26,7 @@ void question0(ArquivoProdutos *ap, FILE *output) {
         }
     }
 
-    // 2. Validar: cada registro deve ser encontrado corretamente em ambos os índices
+    // Verificação
     for (long int i = 0; i < qtd; i++) {
         Produto p;
         if (lerProdutoArquivo(ap, i, &p)) {
@@ -40,7 +38,7 @@ void question0(ArquivoProdutos *ap, FILE *output) {
     }
     fprintf(output, "  Todos os asserts passaram com sucesso!\n");
 
-    // 3. Imprimir pares <chave, nreg> de cada índice
+    // Imprime os pares de chaves e nreg
     fprintf(output, "\n--- Pares na BST (in-order) ---\n");
     printParesIndiceBST(bst, output);
     fprintf(output, "\n--- Pares na Tabela Hash (por bucket) ---\n");
@@ -49,7 +47,8 @@ void question0(ArquivoProdutos *ap, FILE *output) {
             DICA2_HASH_TAM, getColisoesTabelaHash(hash));
     fprintf(output, "##################################################\n");
 
-    // Limpeza
+
+    
     destroyIndiceBST(bst);
     destroyTabelaHash(hash);
 }

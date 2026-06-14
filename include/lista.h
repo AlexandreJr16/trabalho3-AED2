@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "produto.h"
 
-// ======== ListaProdutos (TAD Opaca) ========
+//ListaProdutos
 
 typedef struct ListaProdutos ListaProdutos;
 
@@ -16,7 +16,7 @@ long int getTamanhoListaProdutos(ListaProdutos *self);
 Produto getProdutoListaProdutos(ListaProdutos *self, long int indice);
 void printListaProdutos(ListaProdutos *self, FILE *output);
 
-// ======== ListaLong (TAD Opaca) ========
+//ListaLong
 
 typedef struct ListaLong ListaLong;
 
@@ -27,4 +27,4 @@ void addListaLong(ListaLong *self, long int valor);
 long int getTamanhoListaLong(ListaLong *self);
 long int getElementoListaLong(ListaLong *self, long int indice);
 
-#endif // LISTA_H
+#endif

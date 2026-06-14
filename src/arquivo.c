@@ -3,22 +3,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Definição completa da struct (opaca para o cliente)
 struct ArquivoProdutos {
     char *caminho;
     long int quantidade;
-    FILE *fp;  // Handle persistente para leitura (lazy open)
+    FILE *fp;
 };
 
-// ---- Dados auxiliares para geração aleatória ----
-
+// Isso usa apenas pra gerar os produtos
 static const char *CATEGORIAS[] = {
     "Eletronicos", "Alimentos", "Vestuario",
     "Papelaria", "Esportes", "Brinquedos"
 };
 static const int NUM_CATEGORIAS = 6;
 
-// ---- Construtor / Destrutor ----
+// Construtor / Destrutor
 
 ArquivoProdutos *createArquivoProdutos(const char *caminho) {
     ArquivoProdutos *arq = (ArquivoProdutos *)malloc(sizeof(ArquivoProdutos));
@@ -50,7 +48,7 @@ void destroyArquivoProdutos(ArquivoProdutos *self) {
     }
 }
 
-// ---- Operações Públicas ----
+// Operaçoes publicas
 
 void gerarArquivoProdutos(ArquivoProdutos *self, long int quantidade, long int range_codigo) {
     // Sortear codigos únicos
@@ -61,7 +59,7 @@ void gerarArquivoProdutos(ArquivoProdutos *self, long int quantidade, long int r
     }
     gerarValoresUnicos(codigos, quantidade, range_codigo);
 
-    // Abrir arquivo para escrita binária (sobrescreve)
+    // Abrir arquivo (escreve em bninario)
     FILE *fp = fopen(self->caminho, "wb");
     if (fp == NULL) {
         fprintf(stderr, "Erro: não foi possível abrir arquivo '%s' para escrita\n", self->caminho);
@@ -69,7 +67,7 @@ void gerarArquivoProdutos(ArquivoProdutos *self, long int quantidade, long int r
         exit(EXIT_FAILURE);
     }
 
-    // Gerar e gravar cada produto
+    // Essa parte vai gerar e gravar o prod
     for (long int i = 0; i < quantidade; i++) {
         char nome_temp[50];
         snprintf(nome_temp, sizeof(nome_temp), "Produto_%ld", codigos[i]);
@@ -81,7 +79,7 @@ void gerarArquivoProdutos(ArquivoProdutos *self, long int quantidade, long int r
         strncpy(p.categoria, CATEGORIAS[genRandomNumber(0, NUM_CATEGORIAS - 1)],
                 sizeof(p.categoria) - 1);
         p.categoria[sizeof(p.categoria) - 1] = '\0';
-        p.preco = 1.00 + (double)(rand() % 99900) / 100.0;   // [1.00, 999.99]
+        p.preco = 1.00 + (double)(rand() % 99900) / 100.0;  
         p.quantidade_estoque = (int)genRandomNumber(1, 1000);
         p.codigo_fornecedor = genRandomNumber(1, 100);
 
@@ -92,14 +90,12 @@ void gerarArquivoProdutos(ArquivoProdutos *self, long int quantidade, long int r
     free(codigos);
     self->quantidade = quantidade;
 
-    // Invalidar handle de leitura anterior (conteúdo do arquivo mudou)
     if (self->fp != NULL) {
         fclose(self->fp);
         self->fp = NULL;
     }
 }
 
-// Abre o arquivo para leitura se ainda não estiver aberto (lazy open)
 static int abrirSeNecessario(ArquivoProdutos *self) {
     if (self->fp == NULL) {
         self->fp = fopen(self->caminho, "rb");

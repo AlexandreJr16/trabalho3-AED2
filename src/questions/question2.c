@@ -43,7 +43,7 @@ void question2(ArquivoProdutos *ap, FILE *output) {
         return;
     }
 
-    // 1. Ler todos os registros e guardar os preços reais
+    //\Ler registros
     double *precosReais = (double *)malloc(qtd * sizeof(double));
     IndiceIntervaloAVL *avl = createIndiceIntervaloAVL();
 
@@ -52,50 +52,46 @@ void question2(ArquivoProdutos *ap, FILE *output) {
         lerProdutoArquivo(ap, i, &p);
         precosReais[i] = p.preco;
         
-        // 2. Construir Índice AVL
+        // AVL
         insertIndiceIntervaloAVL(avl, p.preco, i);
     }
 
-    // 3. Ordenar cópia dos preços para calcular percentis
+    // Ordenar
     double *precosOrdenados = (double *)malloc(qtd * sizeof(double));
     memcpy(precosOrdenados, precosReais, qtd * sizeof(double));
     qsort(precosOrdenados, qtd, sizeof(double), cmpDouble);
 
-    // Percentis para seletividade ~2%
-    long int idxP2 = (long int)(qtd * 0.02);   // índice do percentil 2
-    long int idxP98 = (long int)(qtd * 0.98);   // índice do percentil 98
 
-    // Operadores cíclicos: 8 MAIOR, 7 MAIOR_IGUAL, 8 MENOR, 7 MENOR_IGUAL
+    long int idxP2 = (long int)(qtd * 0.02);  
+    long int idxP98 = (long int)(qtd * 0.98); 
+
     Operador operadores[30];
     for (int i = 0; i < 8; i++) operadores[i] = MAIOR;
     for (int i = 8; i < 15; i++) operadores[i] = MAIOR_IGUAL;
     for (int i = 15; i < 23; i++) operadores[i] = MENOR;
     for (int i = 23; i < 30; i++) operadores[i] = MENOR_IGUAL;
 
-    // 4. Gerar 30 alvos seletivos baseados nos percentis
+    // 30 alvos
     double alvos[30];
     for (int i = 0; i < 30; i++) {
         long int idx;
         if (operadores[i] == MAIOR || operadores[i] == MAIOR_IGUAL) {
-            // Sortear preço no percentil 98+ (retorna ~2% dos registros)
             idx = idxP98 + (rand() % (qtd - idxP98));
         } else {
-            // Sortear preço no percentil 2- (retorna ~2% dos registros)
             idx = rand() % (idxP2 + 1);
         }
         alvos[i] = precosOrdenados[idx];
     }
 
-    // Estruturas para guardar tempos
     double temposSeq[30], temposAVL[30];
 
-    // 5. Loop de medição
+    //Medicao
     for (int i = 0; i < 30; i++) {
         double alvo = alvos[i];
         Operador op = operadores[i];
         double inicio, fim;
 
-        // --- Busca AVL ---
+        // AVL
         inicio = getTempoAtual();
         ListaLong *nregsEncontrados = createListaLong();
         buscaIntervaloAVL(avl, alvo, op, nregsEncontrados);
@@ -112,7 +108,7 @@ void question2(ArquivoProdutos *ap, FILE *output) {
         destroyListaLong(nregsEncontrados);
         destroyListaProdutos(produtosAVL);
 
-        // --- Busca Sequencial Direta ---
+        //  Busca Seq
         inicio = getTempoAtual();
         ListaProdutos *produtosSeq = createListaProdutos();
         buscaSequencialIntervalo(ap, alvo, op, produtosSeq);
@@ -128,7 +124,7 @@ void question2(ArquivoProdutos *ap, FILE *output) {
     calcularEstat(temposSeq, &mediaSeq, &desvioSeq);
     calcularEstat(temposAVL, &mediaAVL, &desvioAVL);
 
-    // 6. Impressão de resultados
+ //IMprime
     fprintf(output, "--------------------------------------------------\n");
     fprintf(output, "Resultados (Media e Desvio Padrao de 30 buscas):\n");
     fprintf(output, "--------------------------------------------------\n");
@@ -136,7 +132,7 @@ void question2(ArquivoProdutos *ap, FILE *output) {
     fprintf(output, "Busca AVL  (Intervalo): Media = %f ms | Desvio = %f ms\n", mediaAVL, desvioAVL);
     fprintf(output, "##################################################\n");
 
-    // 7. Impressão dos registros encontrados (item 4 do enunciado)
+    //Ietms achados
     {
         double alvoExemplo = alvos[29];
         Operador opExemplo = operadores[29];
@@ -178,7 +174,6 @@ void question2(ArquivoProdutos *ap, FILE *output) {
         destroyListaProdutos(produtosExemplo);
     }
 
-    // Limpeza
     free(precosReais);
     free(precosOrdenados);
     destroyIndiceIntervaloAVL(avl);

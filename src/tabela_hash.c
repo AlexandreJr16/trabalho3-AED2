@@ -12,7 +12,6 @@ struct TabelaHash {
     long int tamanho;
     long int colisoes;
 };
-
 TabelaHash *createTabelaHash(long int tamanho) {
     TabelaHash *hash = (TabelaHash *)malloc(sizeof(TabelaHash));
     if (hash == NULL) {
@@ -31,7 +30,6 @@ TabelaHash *createTabelaHash(long int tamanho) {
     
     return hash;
 }
-
 void destroyTabelaHash(TabelaHash *self) {
     if (self != NULL) {
         for (long int i = 0; i < self->tamanho; i++) {
@@ -46,17 +44,13 @@ void destroyTabelaHash(TabelaHash *self) {
         free(self);
     }
 }
-
 void insertTabelaHash(TabelaHash *self, long int codigo, long int nreg) {
     if (self == NULL || self->tamanho == 0) return;
     
     long int indice = codigo % self->tamanho;
-    
-    // Verifica colisao (se ja existe algo no bucket antes da inserção)
-    if (self->buckets[indice] != NULL) {
+        if (self->buckets[indice] != NULL) {
         self->colisoes++;
     }
-    
     NodeHash *novoNode = (NodeHash *)malloc(sizeof(NodeHash));
     if (novoNode == NULL) {
         fprintf(stderr, "Erro: falha ao alocar NodeHash\n");
@@ -65,9 +59,7 @@ void insertTabelaHash(TabelaHash *self, long int codigo, long int nreg) {
     
     novoNode->codigo = codigo;
     novoNode->nreg = nreg;
-    
-    // Inserção no início da lista (encadeamento)
-    novoNode->proximo = self->buckets[indice];
+        novoNode->proximo = self->buckets[indice];
     self->buckets[indice] = novoNode;
 }
 

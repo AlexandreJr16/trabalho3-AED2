@@ -2,10 +2,10 @@
 #define OPERADOR_H
 
 typedef enum {
-    MAIOR,        // preco > valor
-    MAIOR_IGUAL,  // preco >= valor
-    MENOR,        // preco < valor
-    MENOR_IGUAL   // preco <= valor
+    MAIOR,      
+    MAIOR_IGUAL, 
+    MENOR,        
+    MENOR_IGUAL   
 } Operador;
 
-#endif // OPERADOR_H
+#endif 

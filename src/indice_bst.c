@@ -1,8 +1,6 @@
 #include "indice_bst.h"
 #include <stdlib.h>
 
-// ======== Estruturas Internas ========
-
 typedef struct NodeIndiceBST {
     long int codigo;
     long int nreg;
@@ -15,8 +13,7 @@ struct IndiceBST {
     long int tamanho;
 };
 
-// ======== Funções Auxiliares (Estáticas) ========
-
+// Funções privadas
 static NodeIndiceBST *createNodeIndiceBST(long int codigo, long int nreg) {
     NodeIndiceBST *node = (NodeIndiceBST *)malloc(sizeof(NodeIndiceBST));
     if (node == NULL) {
@@ -48,9 +45,7 @@ static NodeIndiceBST *insertNode(NodeIndiceBST *node, long int codigo, long int 
         node->esq = insertNode(node->esq, codigo, nreg, inserido);
     } else if (codigo > node->codigo) {
         node->dir = insertNode(node->dir, codigo, nreg, inserido);
-    }
-    // Se codigo == node->codigo, já existe, ignoramos.
-    
+    }    
     return node;
 }
 
@@ -84,7 +79,7 @@ static void inOrder(NodeIndiceBST *node, FILE *output) {
     }
 }
 
-// ======== Funções Públicas ========
+// Funções públicas
 
 IndiceBST *createIndiceBST(void) {
     IndiceBST *bst = (IndiceBST *)malloc(sizeof(IndiceBST));
