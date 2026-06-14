@@ -9,6 +9,9 @@
   struct completa só no `.c`), construtores `createX`, destrutores `destroyX`
 - Toda função que imprime recebe `FILE *output` (se `NULL`, usa `stdout`) —
   mesmo padrão do `showResults` em `utils.c` do T2
+- Convenção de medição na Q1: cada tempo mede o **pipeline completo**
+  (busca no índice + `lerProdutoArquivo` para trazer o registro do disco),
+  refletindo o custo real de uma consulta end-to-end
 - Tipo auxiliar `Operador` (definido em `include/operador.h`), usado nas
   consultas por intervalo (tipos 4 e 5):
 
@@ -256,9 +259,9 @@ Mesmo padrão de rotações de `avl.c` do T2.
 
 ### Operações Internas do IndiceIntervaloAVL
 
-- createNodeIntervaloAVL, destroyNode, insertNode, heightNode, fatorBalanceamento,
-  balancear, rotateLeft, rotateRight, rotateLeftRight, rotateRightLeft
-  — mesmo padrão do `avl.c` do T2
+- createNodeIntervaloAVL, freeNode, insertNode, heightNode, fatorBalanceamento,
+  maxHeight, updateHeight, rotateLeft, rotateRight
+  — mesmo padrão de nomes do `avl.c` do T2 (`heightNode`, `fatorBalanceamento`)
 - buscaIntervalo: void (NodeIntervaloAVL *node, Operador operador, double valor, ListaLong *resultado)
   — versão recursiva interna com a lógica de poda
 - inOrder: void (NodeIntervaloAVL *node, FILE *output)

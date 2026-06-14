@@ -17,13 +17,6 @@ typedef struct {
     long int codigo_fornecedor;
 } Produto;
 
-// Construtor (aloca no heap)
-Produto *createProduto(long int codigo, const char *nome, const char *categoria,
-                       double preco, int quantidade_estoque, long int codigo_fornecedor);
-
-// Destrutor
-void destroyProduto(Produto *self);
-
 // Impressão (output == NULL → stdout)
 void printProduto(Produto *self, FILE *output);
 

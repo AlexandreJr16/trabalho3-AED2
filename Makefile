@@ -16,7 +16,7 @@ TARGET = trabalho3
 
 .PHONY: all clean run
 
-MAIN_DEPS = $(OBJ_DIR)/main.o $(OBJ_DIR)/arquivo.o $(OBJ_DIR)/indice_bst.o $(OBJ_DIR)/tabela_hash.o $(OBJ_DIR)/indice_intervalo_avl.o $(OBJ_DIR)/lista.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/produto.o $(OBJ_DIR)/question1.o $(OBJ_DIR)/question2.o
+MAIN_DEPS = $(OBJ_DIR)/main.o $(OBJ_DIR)/arquivo.o $(OBJ_DIR)/indice_bst.o $(OBJ_DIR)/tabela_hash.o $(OBJ_DIR)/indice_intervalo_avl.o $(OBJ_DIR)/lista.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/produto.o $(OBJ_DIR)/question0.o $(OBJ_DIR)/question1.o $(OBJ_DIR)/question2.o
 
 all: $(TARGET)
 

@@ -5,6 +5,8 @@
 #include <math.h>
 #include <string.h>
 
+#define MAX_REGISTROS_STDOUT 15
+
 static void calcularEstat(double tempos[], double *media, double *desvio) {
     double soma = 0.0;
     for (int i = 0; i < 30; i++) {
@@ -31,7 +33,9 @@ void question2(ArquivoProdutos *ap, FILE *output) {
     if (ap == NULL) return;
     if (output == NULL) output = stdout;
 
-    fprintf(output, "=== Iniciando Question 2: Buscas por Intervalo ===\n");
+    fprintf(output, "\n##################################################\n");
+    fprintf(output, "##   Question 2: Buscas por Intervalo (Preco)    ##\n");
+    fprintf(output, "##################################################\n");
 
     long int qtd = getQuantidadeArquivo(ap);
     if (qtd < 30) {
@@ -85,7 +89,7 @@ void question2(ArquivoProdutos *ap, FILE *output) {
     // Estruturas para guardar tempos
     double temposSeq[30], temposAVL[30];
 
-    // 4. Loop de medição
+    // 5. Loop de medição
     for (int i = 0; i < 30; i++) {
         double alvo = alvos[i];
         Operador op = operadores[i];
@@ -124,13 +128,55 @@ void question2(ArquivoProdutos *ap, FILE *output) {
     calcularEstat(temposSeq, &mediaSeq, &desvioSeq);
     calcularEstat(temposAVL, &mediaAVL, &desvioAVL);
 
-    // 5. Impressão de resultados
+    // 6. Impressão de resultados
     fprintf(output, "--------------------------------------------------\n");
     fprintf(output, "Resultados (Media e Desvio Padrao de 30 buscas):\n");
     fprintf(output, "--------------------------------------------------\n");
     fprintf(output, "Busca Seq. (Intervalo): Media = %f ms | Desvio = %f ms\n", mediaSeq, desvioSeq);
     fprintf(output, "Busca AVL  (Intervalo): Media = %f ms | Desvio = %f ms\n", mediaAVL, desvioAVL);
-    fprintf(output, "==================================================\n");
+    fprintf(output, "##################################################\n");
+
+    // 7. Impressão dos registros encontrados (item 4 do enunciado)
+    {
+        double alvoExemplo = alvos[29];
+        Operador opExemplo = operadores[29];
+        const char *opStr = (opExemplo == MAIOR ? ">" :
+                             opExemplo == MAIOR_IGUAL ? ">=" :
+                             opExemplo == MENOR ? "<" : "<=");
+
+        ListaLong *nregsExemplo = createListaLong();
+        buscaIntervaloAVL(avl, alvoExemplo, opExemplo, nregsExemplo);
+
+        ListaProdutos *produtosExemplo = createListaProdutos();
+        for (long int j = 0; j < getTamanhoListaLong(nregsExemplo); j++) {
+            Produto p;
+            lerProdutoArquivo(ap, getElementoListaLong(nregsExemplo, j), &p);
+            addListaProdutos(produtosExemplo, p);
+        }
+
+        long int totalEncontrados = getTamanhoListaProdutos(produtosExemplo);
+
+        fprintf(output, "\n########## REGISTROS ENCONTRADOS ##########\n");
+        fprintf(output, "Consulta: preco %s %.2f\n", opStr, alvoExemplo);
+        fprintf(output, "Total encontrados: %ld\n\n", totalEncontrados);
+
+        if (output == stdout && totalEncontrados > MAX_REGISTROS_STDOUT) {
+            // No terminal, imprimir apenas os primeiros registros
+            for (long int j = 0; j < MAX_REGISTROS_STDOUT; j++) {
+                Produto pj = getProdutoListaProdutos(produtosExemplo, j);
+                printProduto(&pj, output);
+            }
+            fprintf(output, "  ... e mais %ld registros (ver arquivo completo em data/resultado_q2.txt)\n",
+                    totalEncontrados - MAX_REGISTROS_STDOUT);
+        } else {
+            // No arquivo, imprimir todos
+            printListaProdutos(produtosExemplo, output);
+        }
+        fprintf(output, "###########################################\n");
+
+        destroyListaLong(nregsExemplo);
+        destroyListaProdutos(produtosExemplo);
+    }
 
     // Limpeza
     free(precosReais);

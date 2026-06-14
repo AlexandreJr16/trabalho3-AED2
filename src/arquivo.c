@@ -7,6 +7,7 @@
 struct ArquivoProdutos {
     char *caminho;
     long int quantidade;
+    FILE *fp;  // Handle persistente para leitura (lazy open)
 };
 
 // ---- Dados auxiliares para geração aleatória ----
@@ -34,12 +35,16 @@ ArquivoProdutos *createArquivoProdutos(const char *caminho) {
     }
     strcpy(arq->caminho, caminho);
     arq->quantidade = 0;
+    arq->fp = NULL;
 
     return arq;
 }
 
 void destroyArquivoProdutos(ArquivoProdutos *self) {
     if (self != NULL) {
+        if (self->fp != NULL) {
+            fclose(self->fp);
+        }
         free(self->caminho);
         free(self);
     }
@@ -86,21 +91,33 @@ void gerarArquivoProdutos(ArquivoProdutos *self, long int quantidade, long int r
     fclose(fp);
     free(codigos);
     self->quantidade = quantidade;
+
+    // Invalidar handle de leitura anterior (conteúdo do arquivo mudou)
+    if (self->fp != NULL) {
+        fclose(self->fp);
+        self->fp = NULL;
+    }
+}
+
+// Abre o arquivo para leitura se ainda não estiver aberto (lazy open)
+static int abrirSeNecessario(ArquivoProdutos *self) {
+    if (self->fp == NULL) {
+        self->fp = fopen(self->caminho, "rb");
+        if (self->fp == NULL) return 0;
+    }
+    return 1;
 }
 
 int lerProdutoArquivo(ArquivoProdutos *self, long int nreg, Produto *out) {
     if (nreg < 0 || nreg >= self->quantidade) {
         return 0;
     }
-
-    FILE *fp = fopen(self->caminho, "rb");
-    if (fp == NULL) {
+    if (!abrirSeNecessario(self)) {
         return 0;
     }
 
-    fseek(fp, nreg * (long int)sizeof(Produto), SEEK_SET);
-    size_t lidos = fread(out, sizeof(Produto), 1, fp);
-    fclose(fp);
+    fseek(self->fp, nreg * (long int)sizeof(Produto), SEEK_SET);
+    size_t lidos = fread(out, sizeof(Produto), 1, self->fp);
 
     return (lidos == 1) ? 1 : 0;
 }
@@ -111,36 +128,32 @@ long int getQuantidadeArquivo(ArquivoProdutos *self) {
 
 long int buscaSequencialCodigo(ArquivoProdutos *self, long int codigo, Produto *out) {
     if (self == NULL || self->caminho == NULL) return -1;
-    
-    FILE *fp = fopen(self->caminho, "rb");
-    if (fp == NULL) return -1;
+    if (!abrirSeNecessario(self)) return -1;
 
+    rewind(self->fp);
     Produto p;
     long int nreg = 0;
     
-    while (fread(&p, sizeof(Produto), 1, fp) == 1) {
+    while (fread(&p, sizeof(Produto), 1, self->fp) == 1) {
         if (p.codigo == codigo) {
             if (out != NULL) {
                 *out = p;
             }
-            fclose(fp);
             return nreg;
         }
         nreg++;
     }
     
-    fclose(fp);
     return -1;
 }
 
 void buscaSequencialIntervalo(ArquivoProdutos *self, double preco, Operador op, ListaProdutos *resultado) {
     if (self == NULL || self->caminho == NULL || resultado == NULL) return;
-    
-    FILE *fp = fopen(self->caminho, "rb");
-    if (fp == NULL) return;
+    if (!abrirSeNecessario(self)) return;
 
+    rewind(self->fp);
     Produto p;
-    while (fread(&p, sizeof(Produto), 1, fp) == 1) {
+    while (fread(&p, sizeof(Produto), 1, self->fp) == 1) {
         int atende = 0;
         switch (op) {
             case MAIOR:       if (p.preco > preco) atende = 1; break;
@@ -152,7 +165,5 @@ void buscaSequencialIntervalo(ArquivoProdutos *self, double preco, Operador op, 
             addListaProdutos(resultado, p);
         }
     }
-    
-    fclose(fp);
 }
 

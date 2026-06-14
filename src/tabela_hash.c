@@ -4,7 +4,7 @@
 typedef struct NodeHash {
     long int codigo;
     long int nreg;
-    struct NodeHash *next;
+    struct NodeHash *proximo;
 } NodeHash;
 
 struct TabelaHash {
@@ -38,7 +38,7 @@ void destroyTabelaHash(TabelaHash *self) {
             NodeHash *current = self->buckets[i];
             while (current != NULL) {
                 NodeHash *temp = current;
-                current = current->next;
+                current = current->proximo;
                 free(temp);
             }
         }
@@ -67,7 +67,7 @@ void insertTabelaHash(TabelaHash *self, long int codigo, long int nreg) {
     novoNode->nreg = nreg;
     
     // Inserção no início da lista (encadeamento)
-    novoNode->next = self->buckets[indice];
+    novoNode->proximo = self->buckets[indice];
     self->buckets[indice] = novoNode;
 }
 
@@ -81,7 +81,7 @@ long int searchTabelaHash(TabelaHash *self, long int codigo) {
         if (current->codigo == codigo) {
             return current->nreg;
         }
-        current = current->next;
+        current = current->proximo;
     }
     return -1;
 }
@@ -103,7 +103,7 @@ void printParesTabelaHash(TabelaHash *self, FILE *output) {
             fprintf(output, "Bucket %ld: ", i);
             while (current != NULL) {
                 fprintf(output, "<%ld, %ld> ", current->codigo, current->nreg);
-                current = current->next;
+                current = current->proximo;
             }
             fprintf(output, "\n");
         }

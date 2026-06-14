@@ -7,44 +7,44 @@ typedef struct NodeIntervaloAVL {
     double preco;
     long int nreg;
     int altura;
-    struct NodeIntervaloAVL *left;
-    struct NodeIntervaloAVL *right;
+    struct NodeIntervaloAVL *esq;
+    struct NodeIntervaloAVL *dir;
 } NodeIntervaloAVL;
 
 struct IndiceIntervaloAVL {
-    NodeIntervaloAVL *root;
-    long int size;
+    NodeIntervaloAVL *raiz;
+    long int tamanho;
 };
 
 // 2.2 Funções de Apoio (Altura, Balanço, Rotações)
-static int getHeight(NodeIntervaloAVL *node) {
+static int heightNode(NodeIntervaloAVL *node) {
     if (node == NULL) return 0;
     return node->altura;
 }
 
-static int getBalance(NodeIntervaloAVL *node) {
+static int fatorBalanceamento(NodeIntervaloAVL *node) {
     if (node == NULL) return 0;
-    return getHeight(node->left) - getHeight(node->right);
+    return heightNode(node->esq) - heightNode(node->dir);
 }
 
-static int max(int a, int b) {
+static int maxHeight(int a, int b) {
     return (a > b) ? a : b;
 }
 
 static void updateHeight(NodeIntervaloAVL *node) {
     if (node != NULL) {
-        node->altura = 1 + max(getHeight(node->left), getHeight(node->right));
+        node->altura = 1 + maxHeight(heightNode(node->esq), heightNode(node->dir));
     }
 }
 
 // Rotação à Esquerda (Left Rotation - para nós desbalanceados pendendo à direita)
 static NodeIntervaloAVL *rotateLeft(NodeIntervaloAVL *x) {
-    NodeIntervaloAVL *y = x->right;
-    NodeIntervaloAVL *T2 = y->left;
+    NodeIntervaloAVL *y = x->dir;
+    NodeIntervaloAVL *T2 = y->esq;
 
     // Executa a rotação
-    y->left = x;
-    x->right = T2;
+    y->esq = x;
+    x->dir = T2;
 
     // Atualiza alturas
     updateHeight(x);
@@ -55,12 +55,12 @@ static NodeIntervaloAVL *rotateLeft(NodeIntervaloAVL *x) {
 
 // Rotação à Direita (Right Rotation - para nós desbalanceados pendendo à esquerda)
 static NodeIntervaloAVL *rotateRight(NodeIntervaloAVL *y) {
-    NodeIntervaloAVL *x = y->left;
-    NodeIntervaloAVL *T2 = x->right;
+    NodeIntervaloAVL *x = y->esq;
+    NodeIntervaloAVL *T2 = x->dir;
 
     // Executa a rotação
-    x->right = y;
-    y->left = T2;
+    x->dir = y;
+    y->esq = T2;
 
     // Atualiza alturas
     updateHeight(y);
@@ -80,46 +80,46 @@ static NodeIntervaloAVL *insertNode(NodeIntervaloAVL *node, double preco, long i
             newNode->preco = preco;
             newNode->nreg = nreg;
             newNode->altura = 1;
-            newNode->left = NULL;
-            newNode->right = NULL;
+            newNode->esq = NULL;
+            newNode->dir = NULL;
             (*sizeOut)++;
         }
         return newNode;
     }
 
     if (preco < node->preco) {
-        node->left = insertNode(node->left, preco, nreg, sizeOut);
+        node->esq = insertNode(node->esq, preco, nreg, sizeOut);
     } else {
         // preco >= node->preco: empates ou maiores vão para a direita (conforme enunciado)
-        node->right = insertNode(node->right, preco, nreg, sizeOut);
+        node->dir = insertNode(node->dir, preco, nreg, sizeOut);
     }
 
     // 2. Atualizar altura
     updateHeight(node);
 
     // 3. Obter fator de balanceamento
-    int balance = getBalance(node);
+    int balance = fatorBalanceamento(node);
 
     // 4. Balancear a árvore
     // Left Left Case
-    if (balance > 1 && preco < node->left->preco) {
+    if (balance > 1 && preco < node->esq->preco) {
         return rotateRight(node);
     }
 
     // Right Right Case
-    if (balance < -1 && preco >= node->right->preco) {
+    if (balance < -1 && preco >= node->dir->preco) {
         return rotateLeft(node);
     }
 
     // Left Right Case
-    if (balance > 1 && preco >= node->left->preco) {
-        node->left = rotateLeft(node->left);
+    if (balance > 1 && preco >= node->esq->preco) {
+        node->esq = rotateLeft(node->esq);
         return rotateRight(node);
     }
 
     // Right Left Case
-    if (balance < -1 && preco < node->right->preco) {
-        node->right = rotateRight(node->right);
+    if (balance < -1 && preco < node->dir->preco) {
+        node->dir = rotateRight(node->dir);
         return rotateLeft(node);
     }
 
@@ -130,39 +130,39 @@ static NodeIntervaloAVL *insertNode(NodeIntervaloAVL *node, double preco, long i
 IndiceIntervaloAVL *createIndiceIntervaloAVL(void) {
     IndiceIntervaloAVL *avl = (IndiceIntervaloAVL *)malloc(sizeof(IndiceIntervaloAVL));
     if (avl != NULL) {
-        avl->root = NULL;
-        avl->size = 0;
+        avl->raiz = NULL;
+        avl->tamanho = 0;
     }
     return avl;
 }
 
 static void freeNode(NodeIntervaloAVL *node) {
     if (node != NULL) {
-        freeNode(node->left);
-        freeNode(node->right);
+        freeNode(node->esq);
+        freeNode(node->dir);
         free(node);
     }
 }
 
 void destroyIndiceIntervaloAVL(IndiceIntervaloAVL *self) {
     if (self != NULL) {
-        freeNode(self->root);
+        freeNode(self->raiz);
         free(self);
     }
 }
 
 void insertIndiceIntervaloAVL(IndiceIntervaloAVL *self, double preco, long int nreg) {
     if (self != NULL) {
-        self->root = insertNode(self->root, preco, nreg, &(self->size));
+        self->raiz = insertNode(self->raiz, preco, nreg, &(self->tamanho));
     }
 }
 
 long int sizeIndiceIntervaloAVL(IndiceIntervaloAVL *self) {
-    return (self != NULL) ? self->size : 0;
+    return (self != NULL) ? self->tamanho : 0;
 }
 
 long int heightIndiceIntervaloAVL(IndiceIntervaloAVL *self) {
-    return (self != NULL) ? getHeight(self->root) : 0;
+    return (self != NULL) ? heightNode(self->raiz) : 0;
 }
 
 // 2.4 Implementação da busca com poda recursiva
@@ -198,7 +198,7 @@ static void searchNode(NodeIntervaloAVL *node, double preco, Operador op, ListaL
 
     // Navega in-order (apenas nas subárvores não podadas)
     if (explorarLeft) {
-        searchNode(node->left, preco, op, resultado);
+        searchNode(node->esq, preco, op, resultado);
     }
     
     if (atende) {
@@ -206,11 +206,11 @@ static void searchNode(NodeIntervaloAVL *node, double preco, Operador op, ListaL
     }
     
     if (explorarRight) {
-        searchNode(node->right, preco, op, resultado);
+        searchNode(node->dir, preco, op, resultado);
     }
 }
 
 void buscaIntervaloAVL(IndiceIntervaloAVL *self, double preco, Operador op, ListaLong *resultado) {
     if (self == NULL || resultado == NULL) return;
-    searchNode(self->root, preco, op, resultado);
+    searchNode(self->raiz, preco, op, resultado);
 }

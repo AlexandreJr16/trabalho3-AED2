@@ -25,7 +25,9 @@ void question1(ArquivoProdutos *ap, FILE *output) {
     if (ap == NULL) return;
     if (output == NULL) output = stdout;
 
-    fprintf(output, "=== Iniciando Question 1: Avaliacao de Desempenho de Buscas ===\n");
+    fprintf(output, "\n##################################################\n");
+    fprintf(output, "##   Question 1: Avaliacao de Desempenho (Chave) ##\n");
+    fprintf(output, "##################################################\n");
 
     long int qtd = getQuantidadeArquivo(ap);
     if (qtd < 30) {
@@ -62,6 +64,7 @@ void question1(ArquivoProdutos *ap, FILE *output) {
     double temposSeq[30], temposBST[30], temposHash[30];
 
     // 4. Loop de medição com repetições para confiabilidade
+    //    Cada tempo = pipeline completo (índice + acesso a disco)
     for (int i = 0; i < 30; i++) {
         long int alvo = alvos[i];
         double inicio, fim;
@@ -75,18 +78,20 @@ void question1(ArquivoProdutos *ap, FILE *output) {
         fim = getTempoAtual();
         temposSeq[i] = ((fim - inicio) * 1000.0) / 10.0;
 
-        // --- Busca IndiceBST (REPETICOES_Q1 repetições, sem lerProdutoArquivo) ---
+        // --- Busca IndiceBST (pipeline completo: índice + acesso a disco) ---
         inicio = getTempoAtual();
         for (int r = 0; r < REPETICOES_Q1; r++) {
-            searchIndiceBST(bst, alvo);
+            long int nreg = searchIndiceBST(bst, alvo);
+            if (nreg >= 0) lerProdutoArquivo(ap, nreg, &p);
         }
         fim = getTempoAtual();
         temposBST[i] = ((fim - inicio) * 1000.0) / REPETICOES_Q1;
 
-        // --- Busca TabelaHash (REPETICOES_Q1 repetições, sem lerProdutoArquivo) ---
+        // --- Busca TabelaHash (pipeline completo: índice + acesso a disco) ---
         inicio = getTempoAtual();
         for (int r = 0; r < REPETICOES_Q1; r++) {
-            searchTabelaHash(hash, alvo);
+            long int nreg = searchTabelaHash(hash, alvo);
+            if (nreg >= 0) lerProdutoArquivo(ap, nreg, &p);
         }
         fim = getTempoAtual();
         temposHash[i] = ((fim - inicio) * 1000.0) / REPETICOES_Q1;
@@ -109,7 +114,7 @@ void question1(ArquivoProdutos *ap, FILE *output) {
     fprintf(output, "Busca Tabela Hash: Media = %f ms | Desvio = %f ms\n", mediaHash, desvioHash);
     fprintf(output, "--------------------------------------------------\n");
     fprintf(output, "Colisoes na Tabela Hash (tam 200003): %ld\n", getColisoesTabelaHash(hash));
-    fprintf(output, "==================================================\n");
+    fprintf(output, "##################################################\n");
 
     // Limpeza
     free(codigosReais);

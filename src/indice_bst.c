@@ -6,12 +6,12 @@
 typedef struct NodeIndiceBST {
     long int codigo;
     long int nreg;
-    struct NodeIndiceBST *left;
-    struct NodeIndiceBST *right;
+    struct NodeIndiceBST *esq;
+    struct NodeIndiceBST *dir;
 } NodeIndiceBST;
 
 struct IndiceBST {
-    NodeIndiceBST *root;
+    NodeIndiceBST *raiz;
     long int tamanho;
 };
 
@@ -25,15 +25,15 @@ static NodeIndiceBST *createNodeIndiceBST(long int codigo, long int nreg) {
     }
     node->codigo = codigo;
     node->nreg = nreg;
-    node->left = NULL;
-    node->right = NULL;
+    node->esq = NULL;
+    node->dir = NULL;
     return node;
 }
 
 static void destroyNode(NodeIndiceBST *node) {
     if (node != NULL) {
-        destroyNode(node->left);
-        destroyNode(node->right);
+        destroyNode(node->esq);
+        destroyNode(node->dir);
         free(node);
     }
 }
@@ -45,9 +45,9 @@ static NodeIndiceBST *insertNode(NodeIndiceBST *node, long int codigo, long int 
     }
 
     if (codigo < node->codigo) {
-        node->left = insertNode(node->left, codigo, nreg, inserido);
+        node->esq = insertNode(node->esq, codigo, nreg, inserido);
     } else if (codigo > node->codigo) {
-        node->right = insertNode(node->right, codigo, nreg, inserido);
+        node->dir = insertNode(node->dir, codigo, nreg, inserido);
     }
     // Se codigo == node->codigo, já existe, ignoramos.
     
@@ -59,9 +59,9 @@ static NodeIndiceBST *searchNode(NodeIndiceBST *node, long int codigo) {
         return NULL;
     }
     if (codigo < node->codigo) {
-        return searchNode(node->left, codigo);
+        return searchNode(node->esq, codigo);
     } else if (codigo > node->codigo) {
-        return searchNode(node->right, codigo);
+        return searchNode(node->dir, codigo);
     } else {
         return node;
     }
@@ -71,16 +71,16 @@ static long int heightNode(NodeIndiceBST *node) {
     if (node == NULL) {
         return 0;
     }
-    long int hLeft = heightNode(node->left);
-    long int hRight = heightNode(node->right);
-    return (hLeft > hRight ? hLeft : hRight) + 1;
+    long int hEsq = heightNode(node->esq);
+    long int hDir = heightNode(node->dir);
+    return (hEsq > hDir ? hEsq : hDir) + 1;
 }
 
 static void inOrder(NodeIndiceBST *node, FILE *output) {
     if (node != NULL) {
-        inOrder(node->left, output);
+        inOrder(node->esq, output);
         fprintf(output, "<%ld, %ld>\n", node->codigo, node->nreg);
-        inOrder(node->right, output);
+        inOrder(node->dir, output);
     }
 }
 
@@ -92,14 +92,14 @@ IndiceBST *createIndiceBST(void) {
         fprintf(stderr, "Erro: falha ao alocar IndiceBST\n");
         exit(EXIT_FAILURE);
     }
-    bst->root = NULL;
+    bst->raiz = NULL;
     bst->tamanho = 0;
     return bst;
 }
 
 void destroyIndiceBST(IndiceBST *self) {
     if (self != NULL) {
-        destroyNode(self->root);
+        destroyNode(self->raiz);
         free(self);
     }
 }
@@ -107,7 +107,7 @@ void destroyIndiceBST(IndiceBST *self) {
 void insertIndiceBST(IndiceBST *self, long int codigo, long int nreg) {
     if (self == NULL) return;
     int inserido = 0;
-    self->root = insertNode(self->root, codigo, nreg, &inserido);
+    self->raiz = insertNode(self->raiz, codigo, nreg, &inserido);
     if (inserido) {
         self->tamanho++;
     }
@@ -115,7 +115,7 @@ void insertIndiceBST(IndiceBST *self, long int codigo, long int nreg) {
 
 long int searchIndiceBST(IndiceBST *self, long int codigo) {
     if (self == NULL) return -1;
-    NodeIndiceBST *result = searchNode(self->root, codigo);
+    NodeIndiceBST *result = searchNode(self->raiz, codigo);
     if (result != NULL) {
         return result->nreg;
     }
@@ -129,7 +129,7 @@ long int sizeIndiceBST(IndiceBST *self) {
 
 long int heightIndiceBST(IndiceBST *self) {
     if (self == NULL) return 0;
-    return heightNode(self->root);
+    return heightNode(self->raiz);
 }
 
 void printParesIndiceBST(IndiceBST *self, FILE *output) {
@@ -137,5 +137,5 @@ void printParesIndiceBST(IndiceBST *self, FILE *output) {
     if (output == NULL) {
         output = stdout;
     }
-    inOrder(self->root, output);
+    inOrder(self->raiz, output);
 }
