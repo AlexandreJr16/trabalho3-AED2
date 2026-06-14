@@ -96,6 +96,7 @@ void gerarArquivoProdutos(ArquivoProdutos *self, long int quantidade, long int r
     }
 }
 
+// Verifica se o arquivo ta aberto, se nao tiver abre
 static int abrirSeNecessario(ArquivoProdutos *self) {
     if (self->fp == NULL) {
         self->fp = fopen(self->caminho, "rb");
