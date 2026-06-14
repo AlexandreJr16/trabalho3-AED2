@@ -4,7 +4,6 @@
 #include "arquivo.h"
 #include <stdio.h>
 
-void question0(ArquivoProdutos *ap, FILE *output);
 void question1(ArquivoProdutos *ap, FILE *output);
 void question2(ArquivoProdutos *ap, FILE *output);
 
